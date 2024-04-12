@@ -1,15 +1,9 @@
-from rest_framework import viewsets, serializers
+from rest_framework import viewsets
 from .models import Event
-
-
-class EventSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Event
-        fields = '__all__'
+from .serializers import EventSerializer
 
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-
 
