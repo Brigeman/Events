@@ -1,6 +1,10 @@
 from rest_framework import serializers
 from .models import Event, Registration
 from django.contrib.auth import get_user_model
+import logging
+
+logger = logging.getLogger(__name__)
+
 User = get_user_model()
 
 
@@ -33,9 +37,19 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    organizer = UserSerializer(read_only=True)
-
     class Meta:
         model = Event
-        fields = ['id', 'name', 'description', 'date_time', 'location', 'organizer', 'max_participants']
+        fields = ['id', 'name', 'description', 'date_time', 'location', 'organizer', 'created_by', 'max_participants']
+        read_only_fields = ['id', 'organizer', 'created_by']
 
+    def create(self, validated_data):
+        logger.debug(f"Received data: {validated_data}")
+        logger.debug(f"Context user: {self.context['request'].user if 'request' in self.context else 'No user context'}")
+        if self.context['request'].user.is_authenticated:
+            validated_data['organizer'] = validated_data.get('organizer', self.context['request'].user)
+            validated_data['created_by'] = validated_data.get('created_by', self.context['request'].user)
+            event = super().create(validated_data)
+            logger.debug(f"Event created: {event}")
+            return event
+        else:
+            raise serializers.ValidationError("User must be authenticated to create event")

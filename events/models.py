@@ -36,5 +36,5 @@ class Registration(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     date_registered = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=10, default='active')  # Active, Cancelled
+    status = models.CharField(max_length=10, default='active')  # active, cancelled
 
